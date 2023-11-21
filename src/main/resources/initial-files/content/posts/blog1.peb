@@ -1,0 +1,10 @@
+{% extends "../../templates/post.peb" %}
+
+    {% set title = "Blog Post 1" %}
+    {% set keywords = "Blog,post,keywords" %}
+    {% set description = "Blog Post 1 description" %}
+
+{% block postContent %}
+    <h2>This is the post content for blog post 1</h2>
+{% endblock %}
+

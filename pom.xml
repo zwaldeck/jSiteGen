@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.0-SNAPSHOT</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <groupId>be.zsoft</groupId>
+    <artifactId>jsitegen</artifactId>
+    <version>0.0.1</version>
+    <name>JSiteGen</name>
+    <description>A Java Static site generator build on top of pebble</description>
+
+    <properties>
+        <java.version>21</java.version>
+        <spring-shell.version>3.2.0-M2</spring-shell.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.shell</groupId>
+            <artifactId>spring-shell-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.15.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.pebbletemplates</groupId>
+            <artifactId>pebble</artifactId>
+            <version>3.2.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+            <version>2.15.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>de.larsgrefer.sass</groupId>
+            <artifactId>sass-embedded-host</artifactId>
+            <version>3.3.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.shell</groupId>
+                <artifactId>spring-shell-dependencies</artifactId>
+                <version>${spring-shell.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <repositories>
+        <repository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>spring-snapshots</id>
+            <name>Spring Snapshots</name>
+            <url>https://repo.spring.io/snapshot</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+            <id>spring-snapshots</id>
+            <name>Spring Snapshots</name>
+            <url>https://repo.spring.io/snapshot</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <profiles>
+        <profile>
+            <id>debian</id>
+            <properties>
+                <company.name>zsoft</company.name>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.vafer</groupId>
+                        <artifactId>jdeb</artifactId>
+                        <version>1.10</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jdeb</goal>
+                                </goals>
+                                <configuration>
+                                    <deb>${project.build.directory}/${project.artifactId}.deb</deb>
+                                    <verbose>true</verbose>
+                                    <snapshotExpand>true</snapshotExpand>
+                                    <!-- expand "SNAPSHOT" to what is in the "USER" env variable -->
+                                    <snapshotEnv>USER</snapshotEnv>
+                                    <controlDir>${basedir}/src/deb/control</controlDir>
+                                    <dataSet>
+                                        <data>
+                                            <src>${project.build.directory}/${project.build.finalName}.jar</src>
+                                            <type>file</type>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <prefix>/opt/${company.name}/${project.artifactId}/${project.version}/bin</prefix>
+                                                <user>root</user>
+                                                <group>root</group>
+                                                <filemode>755</filemode>
+                                            </mapper>
+                                        </data>
+                                        <data>
+                                            <type>template</type>
+                                            <paths>
+                                                <path>/opt/${company.name}/${project.artifactId}/${project.version}/conf</path>
+                                                <path>etc/${project.artifactId}</path>
+                                                <path>var/lib/${project.artifactId}</path>
+                                                <path>var/log/${project.artifactId}</path>
+                                                <path>var/run/${project.artifactId}</path>
+                                            </paths>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <user>loader</user>
+                                                <group>loader</group>
+                                            </mapper>
+                                        </data>
+                                        <data>
+                                            <type>link</type>
+                                            <linkName>/opt/${company.name}/${project.artifactId}/current</linkName>
+                                            <linkTarget>/opt/${company.name}/${project.artifactId}/${project.version}</linkTarget>
+                                            <symlink>true</symlink>
+                                        </data>
+                                    </dataSet>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

@@ -1,0 +1,5 @@
+{% extends "./base.peb" %}
+
+{% block body %}
+    {% block postContent %}{% endblock %}
+{% endblock %}

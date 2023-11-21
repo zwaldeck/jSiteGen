@@ -1,0 +1,8 @@
+Package: [[name]]
+Version: [[version]]
+Section: programming
+Priority: low
+Architecture: all
+Depends:
+Description: [[description]]
+Maintainer: wout@z-soft.be

@@ -1,0 +1,39 @@
+name: Create a new release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Java for building
+        uses: actions/setup-java@v3
+        with:
+          java-version: 21
+          distribution: 'corretto'
+      - name: Package with Maven
+        run: mvn clean package
+      - name: Create release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          draft: false
+          prerelease: false
+          release_name: ${{ github.ref }}
+          tag_name: ${{ github.ref }}
+          body_path: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Upload JAR artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./target/jsitegen-${{ github.ref }}.jar
+          asset_name: jsitegen-${{ github.ref }}.jar
+          asset_content_type: 	application/java-archive

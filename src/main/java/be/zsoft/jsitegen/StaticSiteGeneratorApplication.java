@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.shell.command.annotation.CommandScan;
 
 @SpringBootApplication
-@CommandScan(basePackages = {"be.zsoft.ssg.command"})
+@CommandScan(basePackages = {"be.zsoft.jsitegen.command"})
 public class StaticSiteGeneratorApplication {
 
     public static void main(String[] args) {

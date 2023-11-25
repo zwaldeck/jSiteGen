@@ -30,6 +30,9 @@ public class PebbleBuilderService {
     private final WriterFactory writerFactory;
 
     public void buildPebbleTemplates(List<Page> pages, Path outputPath) {
+        pebbleEngine.getTemplateCache().invalidateAll();
+        pebbleEngine.getTagCache().invalidateAll();
+
         Map<String, Object> context = globalVariableResolver.resolveGlobalVariables(pages);
 
         pages.forEach(page -> buildPage(page, outputPath, context));

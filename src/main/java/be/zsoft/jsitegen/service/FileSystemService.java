@@ -10,9 +10,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
 
 @RequiredArgsConstructor
@@ -66,5 +65,19 @@ public class FileSystemService {
         IOFileFilter filter = FileFilterUtils.or(FileFilterUtils.directoryFileFilter(), htmlFileFilter);
 
         return FileUtils.listFiles(path.toFile(), filter, FileFilterUtils.trueFileFilter());
+    }
+
+    public WatchService getNewWatchService() throws IOException{
+        return FileSystems.getDefault().newWatchService();
+    }
+
+    public void registerAllOnWatchService(Path sourcePath, WatchService watchService) throws IOException {
+        Files.walkFileTree(sourcePath, new SimpleFileVisitor<>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                dir.register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE);
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 }

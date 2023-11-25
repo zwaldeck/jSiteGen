@@ -7,8 +7,11 @@ import be.zsoft.jsitegen.service.FileSystemService;
 import be.zsoft.jsitegen.service.ShellColorHelper;
 import be.zsoft.jsitegen.service.util.WriterFactory;
 import io.pebbletemplates.pebble.PebbleEngine;
+import io.pebbletemplates.pebble.cache.CacheKey;
+import io.pebbletemplates.pebble.cache.PebbleCache;
 import io.pebbletemplates.pebble.template.PebbleTemplate;
 import org.jline.terminal.Terminal;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,6 +33,12 @@ class PebbleBuilderServiceTest {
 
     @Mock
     private PebbleEngine pebbleEngine;
+
+    @Mock
+    private PebbleCache<Object, PebbleTemplate> templateCache;
+
+    @Mock
+    private PebbleCache<CacheKey, Object> tagCache;
 
     @Mock
     private GlobalVariableResolver globalVariableResolver;
@@ -58,6 +67,12 @@ class PebbleBuilderServiceTest {
     @InjectMocks
     private PebbleBuilderService service;
 
+    @BeforeEach
+    void setup() {
+        when(pebbleEngine.getTemplateCache()).thenReturn(templateCache);
+        when(pebbleEngine.getTagCache()).thenReturn(tagCache);
+    }
+
     @Test
     void buildPebbleTemplates_ioException() throws Exception{
         Map<String, Object> context = Map.of("title", "title");
@@ -69,6 +84,8 @@ class PebbleBuilderServiceTest {
 
         assertThrows(BuildException.class, () -> service.buildPebbleTemplates(pages, outputPath));
 
+        verify(templateCache).invalidateAll();
+        verify(tagCache).invalidateAll();
         verify(globalVariableResolver).resolveGlobalVariables(pages);
         verify(fileSystemService).createDirectories(outputPath);
     }
@@ -87,6 +104,8 @@ class PebbleBuilderServiceTest {
 
         service.buildPebbleTemplates(pages, outputPath);
 
+        verify(templateCache).invalidateAll();
+        verify(tagCache).invalidateAll();
         verify(globalVariableResolver).resolveGlobalVariables(pages);
         verify(fileSystemService, times(2)).createDirectories(any(Path.class));
         verify(writerFactory, times(2)).getWriter(any(Path.class));

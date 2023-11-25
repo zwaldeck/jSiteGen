@@ -2,6 +2,7 @@ package be.zsoft.jsitegen.command;
 
 import be.zsoft.jsitegen.service.ConfigLoaderService;
 import be.zsoft.jsitegen.service.DefaultOptionResolver;
+import be.zsoft.jsitegen.service.WatcherService;
 import be.zsoft.jsitegen.service.build.BuildService;
 import be.zsoft.jsitegen.service.newsite.GenerateNewSiteService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class MainCommand {
     private final ConfigLoaderService configLoaderService;
     private final BuildService buildService;
     private final GenerateNewSiteService generateNewSiteService;
+    private final WatcherService watcherService;
 
     @Command(command = "build", description = "Build the static site", interactionMode = InteractionMode.NONINTERACTIVE)
     public String build(
@@ -50,5 +52,17 @@ public class MainCommand {
         generateNewSiteService.generateNewSite(outputPath, scss, name);
 
         return "New site files generated: %s".formatted(outputPath);
+    }
+
+    @Command(command = "watch", description = "Watch a directory for changes", interactionMode = InteractionMode.NONINTERACTIVE)
+    public void watchSite(
+            @Option(required = false, longNames = "profile", shortNames = 'P', label = "Profile") Optional<String> configProfile,
+            @Option(required = false, longNames = "input", shortNames = 'I', label = "Input dir") Optional<String> input,
+            @Option(required = false, longNames = "output", shortNames = 'O', label = "Output dir") Optional<String> output
+    ) {
+        Path sourcePath = Path.of(defaultOptionResolver.getOrDefaultInputDir(input));
+        Path outputPath = Path.of(defaultOptionResolver.getOrDefaultOutputDir(output));
+
+        watcherService.watchForChanges(sourcePath, outputPath, configProfile.orElse(""));
     }
 }
